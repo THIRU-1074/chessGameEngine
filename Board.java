@@ -1,14 +1,33 @@
 package chessGameEngine;
 
-public class Board {
+final public class Board {
 
     Square[][] board;
     boolean isMate;
     boolean isCheck;
     int blackPoints, whitePoints;
+    boolean isBlackTurn;
+    int kingRowBlack, kingColBlack;
+    int kingRowWhite, kingColWhite;
 
-    void check() {
-
+    boolean check(boolean checkBlack) {
+        for (int r = 0; r < 8; ++r) {
+            for (int c = 0; c < 8; ++c) {
+                if (board[r][c].coin.isBlack ^ !checkBlack) {
+                    continue;
+                }
+                if (board[r][c].coin.isBlack) {
+                    if (board[r][c].coin.move(r, c, kingRowWhite, kingColWhite, board)) {
+                        return true;
+                    }
+                } else {
+                    if (board[r][c].coin.move(r, c, kingRowBlack, kingColBlack, board)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     void checkMate() {
@@ -19,17 +38,17 @@ public class Board {
         int point;
         Coin captureCoin = board[atRow][atCol].coin;
         if (captureCoin instanceof Rook) {
-            point = 5; 
-        }else if (captureCoin instanceof Queen) {
-            point = 9; 
-        }else if (captureCoin instanceof Bishop || captureCoin instanceof Knight) {
-            point = 3; 
-        }else {
+            point = 5;
+        } else if (captureCoin instanceof Queen) {
+            point = 9;
+        } else if (captureCoin instanceof Bishop || captureCoin instanceof Knight) {
+            point = 3;
+        } else {
             point = 1;
         }
         if (board[atRow][atCol].coin.isBlack) {
-            blackPoints += point; 
-        }else {
+            blackPoints += point;
+        } else {
             whitePoints += point;
         }
         board[atRow][atCol].coin = null;
@@ -48,14 +67,32 @@ public class Board {
         if (!board[fromRow][fromCol].coin.move(fromRow, fromCol, toRow, toCol, board)) {
             return false;
         }
+        boolean wasCheck = isCheck;
         if (board[toRow][toCol].coin != null) {
             if (board[toRow][toCol].coin.isBlack == board[fromRow][fromCol].coin.isBlack) {
                 return false;
             }
             capture(toRow, toCol);
         }
+        checkMate();
+        if (isMate) {
+            return false;
+        }
+        if (wasCheck && isCheck) {
+            return false;
+        }
+        if (board[fromRow][fromCol].coin instanceof King) {
+            if (board[fromRow][fromCol].coin.isBlack) {
+                kingColBlack = toCol;
+                kingRowBlack = toRow;
+            } else {
+                kingColWhite = toCol;
+                kingRowWhite = toRow;
+            }
+        }
         board[toRow][toCol].coin = board[fromRow][fromCol].coin;
         board[fromRow][fromCol] = null;
+        isBlackTurn = !isBlackTurn;
         return true;
     }
 
@@ -64,6 +101,7 @@ public class Board {
         whitePoints = 0;
         isMate = false;
         isCheck = false;
+        isBlackTurn = true;
         boolean colorInd = false;
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
@@ -97,8 +135,6 @@ public class Board {
     Board() {
         board = new Square[8][8];
         boolean colorStart = false;
-        blackPoints = 0;
-        whitePoints = 0;
         for (int i = 0; i < 8; ++i) {
             boolean colorCurrent = colorStart;
             for (int j = 0; j < 8; ++j) {
