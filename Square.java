@@ -3,10 +3,10 @@ package chessGameEngine;
 public class Square {
 
     boolean isColorBlack;
-    Coin c;
+    Coin coin;
 
     Square(boolean color) {
-        this.c = null;
+        this.coin = null;
         this.isColorBlack = color;
     }
 }
