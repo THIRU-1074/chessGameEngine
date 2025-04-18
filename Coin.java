@@ -65,6 +65,7 @@ class King extends Coin {
         super(color);
     }
 
+    @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
         return (Math.abs(fromRow - toRow) == 1 ^ Math.abs(fromCol - toCol) == 1);
     }
@@ -76,6 +77,7 @@ class Queen extends Coin {
         super(color);
     }
 
+    @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
         return (isValidBishopMove(fromRow, fromCol, toRow, toCol, board) || isValidRookMove(fromRow, fromCol, toRow, toCol, board));
     }
@@ -87,6 +89,7 @@ class Bishop extends Coin {
         super(color);
     }
 
+    @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
         return isValidBishopMove(fromRow, fromCol, toRow, toCol, board);
     }
@@ -98,6 +101,7 @@ class Rook extends Coin {
         super(color);
     }
 
+    @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
         return isValidRookMove(fromRow, fromCol, toRow, toCol, board);
     }
@@ -109,11 +113,11 @@ class Knight extends Coin {
         super(color);
     }
 
+    @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
         if (Math.abs(fromRow - toRow) == 2 && Math.abs(fromCol - toCol) == 1) {
             return true;
-        }
-        if (Math.abs(fromRow - toRow) == 1 && Math.abs(fromCol - toCol) == 2) {
+        } else if (Math.abs(fromRow - toRow) == 1 && Math.abs(fromCol - toCol) == 2) {
             return true;
         }
         return false;
@@ -126,19 +130,24 @@ class Pawn extends Coin {
         super(color);
     }
 
+    @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
-        if (Math.abs(toCol - fromCol) > 1) {
-            return false;
+        boolean flag = false;
+        if (Math.abs(toCol - fromCol) == 1) {
+            if (isBlack && (toRow - fromRow == 1) || (fromRow == 6 && toRow == 4)) {
+                flag = true;
+            } else if (!isBlack && (fromRow - toRow == 1 || (fromRow == 1 && toRow == 3))) {
+                flag = true;
+            }
+        } else if (Math.abs(toCol - fromCol) == 1 && ((isBlack && toRow - fromRow == 1) || (!isBlack && fromRow - toRow == 1)) && board[toRow][toCol].coin != null) {
+            flag = true;
         }
-        if (isBlack && toRow >= fromRow) {
-            return false;
+        if (flag && (toRow == 7 || toRow == 0)) {
+            promote(toCol, toRow, board);
         }
-        if (!isBlack && toRow <= fromRow) {
-            return false;
-        }
-        if (Math.abs(toCol - fromCol) == 1 && board[toRow][toCol].coin == null) {
-            return false;
-        }
-        return true;
+        return flag;
+    }
+
+    void promote(int toCol, int toRow, Square[][] board) {
     }
 }

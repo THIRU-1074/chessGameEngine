@@ -15,18 +15,15 @@ public class Test {
     public static void main(String[] args) {
         Board b = new Board();
         Scanner in = new Scanner(System.in);
-        while (b.isMate) {
+        while (!b.isMate) {
             String move = in.nextLine();
             moveParser(move, b);
             b.checkMate();
-            if (b.isMate) {
-                break;
-            }
         }
         if (b.isBlackTurn) {
-            System.out.println("Black wins");
+            System.out.println("White won");
         } else {
-            System.out.println("White wins");
+            System.out.println("Black won");
         }
         in.close();
     }
