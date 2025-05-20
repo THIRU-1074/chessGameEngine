@@ -2,7 +2,7 @@ package chessGameEngine;
 
 import java.util.*;
 
-final public class Board {
+final class Board {
 
     Square[][] board;
     boolean isMate;
@@ -13,7 +13,6 @@ final public class Board {
     Stack<String> prevMoves;
     int kingRowBlack, kingColBlack;
     int kingRowWhite, kingColWhite;
-    boolean canBCastle, canWCastle;
 
     boolean check(boolean checkForBlack) {
         for (int r = 0; r < 8; ++r) {
@@ -74,14 +73,39 @@ final public class Board {
             return;
         }
         isBlackTurn = !isBlackTurn;
+        isCheck = false;
+        boolean isPromoted = false;
+        if (!prevMoves.isEmpty() && prevMoves.peek().equals("PROMOTED")) {
+            isPromoted = true;
+            prevMoves.pop();
+        }
         String prevMove = prevMoves.pop();
-        canBCastle = (prevMove.charAt(0) == '1') ? (true) : (false);
-        canWCastle = (prevMove.charAt(1) == '1') ? (true) : (false);
-        int fromRow = prevMove.charAt(2) - 48, fromCol = prevMove.charAt(3) - 48;
-        int toRow = prevMove.charAt(4) - 48, toCol = prevMove.charAt(5) - 48;
+
+        int fromRow = prevMove.charAt(1) - 48, fromCol = prevMove.charAt(2) - 48;
+        int toRow = prevMove.charAt(3) - 48, toCol = prevMove.charAt(4) - 48;
+        if (prevMove.charAt(0) == '1') {
+            switch (board[toRow][toCol].coin) {
+                case King king ->
+                    king.canCastle = true;
+                case Rook rook ->
+                    rook.canCastle = true;
+                default -> {
+                }
+            }
+        }
         board[fromRow][fromCol].coin = board[toRow][toCol].coin;
         board[toRow][toCol].coin = captured.pop();
-        if (board[fromRow][fromCol].coin instanceof King) {
+        if (board[fromRow][fromCol].coin instanceof King king) {
+            if (Math.abs(fromCol - toCol) > 1) {
+                if (fromCol > toCol) {
+                    board[toRow][0].coin = board[toRow][toCol + 1].coin;
+                } else {
+                    board[toRow][7].coin = board[toRow][toCol - 1].coin;
+                }
+                king.canCastle = true;
+                Rook rook = (Rook) board[toRow][(fromCol > toCol) ? (0) : (7)].coin;
+                rook.canCastle = true;
+            }
             if (board[fromRow][fromCol].coin.isBlack) {
                 kingRowBlack = fromRow;
                 kingColBlack = fromCol;
@@ -89,6 +113,9 @@ final public class Board {
                 kingRowWhite = fromRow;
                 kingColBlack = fromCol;
             }
+        }
+        if (isPromoted) {
+            board[fromRow][fromCol].coin = new Pawn(board[fromRow][fromCol].coin.isBlack);
         }
         if (board[toRow][toCol].coin == null) {
             return;
@@ -114,6 +141,83 @@ final public class Board {
             point = 1;
         }
         return point;
+    }
+
+    boolean castle(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
+        if (board[fromRow][fromCol].coin instanceof King && !isCheck) {
+            King king = (King) board[fromRow][fromCol].coin;
+            if (!king.castle(toRow, toCol, board)) {
+                System.out.println("Castling not Feasible...");
+                return false;
+            }
+            Rook rook = (Rook) board[toRow][(toCol == 2) ? (0) : (7)].coin;
+            board[toRow][(toCol == 2) ? (0) : (7)].coin = null;
+            board[toRow][(toCol == 2) ? (3) : (5)].coin = king;
+            board[toRow][fromCol].coin = null;
+            if (isBlackTurn) {
+                kingColBlack = (toCol == 2) ? (3) : (5);
+            } else {
+                (kingColWhite) = (toCol == 2) ? (3) : (5);
+            }
+            if (check(isBlackTurn)) {
+                board[toRow][fromCol].coin = king;
+                board[toRow][(toCol == 2) ? (3) : (5)].coin = null;
+                board[toRow][(toCol == 2) ? (0) : (7)].coin = rook;
+                if (verbose) {
+                    System.out.println("The coin move is not feasible...");
+                }
+                if (isBlackTurn) {
+                    kingColBlack = fromCol;
+                } else {
+                    kingColWhite = fromCol;
+                }
+                return false;
+            }
+            if (isBlackTurn) {
+                kingColBlack = (toCol == 2) ? (2) : (6);
+            } else {
+                kingColWhite = (toCol == 2) ? (2) : (6);
+            }
+            board[toRow][(toCol == 2) ? (2) : (6)].coin = king;
+            board[toRow][(toCol == 2) ? (3) : (5)].coin = null;
+            if (check(isBlackTurn)) {
+                board[toRow][fromCol].coin = king;
+                board[toRow][(toCol == 2) ? (2) : (6)].coin = null;
+                board[toRow][(toCol == 2) ? (0) : (7)].coin = rook;
+                if (verbose) {
+                    System.out.println("The coin move is not feasible...");
+                }
+                if (isBlackTurn) {
+                    kingColBlack = fromCol;
+                } else {
+                    kingColWhite = fromCol;
+                }
+                return false;
+            }
+            if (isBlackTurn) {
+                kingColBlack = fromCol;
+            } else {
+                kingColWhite = fromCol;
+            }
+            board[toRow][(toCol == 2) ? (3) : (5)].coin = rook;
+            board[toRow][fromCol].coin = king;
+            board[toRow][(toCol == 2) ? (2) : (6)].coin = null;
+            rook.canCastle = false;
+            return true;
+        }
+        return false;
+    }
+
+    boolean promote(int toRow, int toCol) {
+        if ((board[toRow][toCol].coin instanceof Pawn) && (toRow == '7' || toRow == '0')) {
+            Pawn pawn = (Pawn) board[toRow][toCol].coin;
+            if (!pawn.promote(toRow, toCol, board)) {
+                undo();
+                return false;
+            }
+            prevMoves.push("PROMOTED");
+        }
+        return true;
     }
 
     boolean move(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
@@ -142,15 +246,17 @@ final public class Board {
             return false;
         }
         if (!board[fromRow][fromCol].coin.move(fromRow, fromCol, toRow, toCol, board)) {
-            if (verbose) {
-                System.out.println("The coin move is not feasible...");
+            if (castle(fromRow, fromCol, toRow, toCol, verbose)); else {
+                if (verbose) {
+                    System.out.println("The coin move is not feasible...");
+                }
+                return false;
             }
-            return false;
         }
         if (board[toRow][toCol].coin != null) {
             if (board[toRow][toCol].coin.isBlack == board[fromRow][fromCol].coin.isBlack) {
                 if (verbose) {
-                    System.out.println("Don't Capture of your army.....");
+                    System.out.println("Don't Capture your army.....");
                 }
                 return false;
             }
@@ -164,31 +270,37 @@ final public class Board {
         } else {
             captured.push(null);
         }
-
-        if (board[fromRow][fromCol].coin instanceof King) {
-            if (board[fromRow][fromCol].coin.isBlack) {
-                kingColBlack = toCol;
-                kingRowBlack = toRow;
-            } else {
-                kingColWhite = toCol;
-                kingRowWhite = toRow;
+        char castleFlag = '0';
+        switch (board[fromRow][fromCol].coin) {
+            case King king -> {
+                if (board[fromRow][fromCol].coin.isBlack) {
+                    kingColBlack = toCol;
+                    kingRowBlack = toRow;
+                } else {
+                    kingColWhite = toCol;
+                    kingRowWhite = toRow;
+                }
+                if (king.canCastle) {
+                    castleFlag = '1';
+                }
+                king.canCastle = false;
+            }
+            case Rook rook -> {
+                if (rook.canCastle) {
+                    castleFlag = '1';
+                }
+                rook.canCastle = false;
+            }
+            default -> {
             }
         }
         String str = "";
-        str += (canBCastle) ? ('1') : ('0');
-        str += (canWCastle) ? ('1') : ('0');
+        str += castleFlag;
         str += (char) (fromRow + 48);
         str += (char) (fromCol + 48);
         str += (char) (toRow + 48);
         str += (char) (toCol + 48);
         prevMoves.push(str);
-        if (board[toRow][toCol].coin instanceof King) {
-            if (isBlackTurn) {
-                canBCastle = false;
-            } else {
-                canWCastle = false;
-            }
-        }
         board[toRow][toCol].coin = board[fromRow][fromCol].coin;
         board[fromRow][fromCol].coin = null;
         boolean flag = check(isBlackTurn);
@@ -200,14 +312,16 @@ final public class Board {
             }
             return false;
         }
+        if (!promote(toRow, toCol)) {
+            return false;
+        }
+        isCheck = check(isBlackTurn);
         return true;
     }
 
     void resetBoard() {
         captured = new Stack<>();
         prevMoves = new Stack<>();
-        canBCastle = true;
-        canWCastle = true;
         blackPoints = 0;
         whitePoints = 0;
         isMate = false;

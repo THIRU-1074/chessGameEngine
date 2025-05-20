@@ -1,6 +1,6 @@
 package chessGameEngine;
 
-public class Square {
+class Square {
 
     boolean isColorBlack;
     Coin coin;

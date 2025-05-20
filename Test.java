@@ -2,11 +2,11 @@ package chessGameEngine;
 
 import java.util.*;
 
-public class Test {
+class Test {
 
     public static void printCoin(Coin c) {
         if (c == null) {
-            System.out.print(". ");
+            System.out.print(" . ");
             return;
         }
         String res = "";
@@ -28,7 +28,7 @@ public class Test {
         } else {
             res += "P";
         }
-        System.out.print(res);
+        System.out.print(res + " ");
     }
 
     public static void display(Board b) {
@@ -59,7 +59,9 @@ public class Test {
             moveParser(move, b);
             b.checkMate(b.isBlackTurn);
         }
-        if (b.isBlackTurn) {
+        if (!b.check(b.isBlackTurn)) {
+            System.out.println("Stale Mate (Draw)");
+        } else if (b.isBlackTurn) {
             System.out.println("White won");
         } else {
             System.out.println("Black won");

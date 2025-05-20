@@ -1,5 +1,17 @@
 package chessGameEngine;
 
+import java.util.*;
+
+interface coinPromotion {
+
+    boolean promote(int toRow, int toCol, Square[][] board);
+}
+
+interface castling {
+
+    boolean castle(int toRow, int toCol, Square[][] board);
+}
+
 abstract class Coin {
 
     boolean isBlack;//coin color
@@ -49,15 +61,30 @@ abstract class Coin {
     }
 }
 
-class King extends Coin {
+class King extends Coin implements castling {
+
+    boolean canCastle;
 
     King(boolean color) {
         super(color);
+        canCastle = true;
     }
 
     @Override
     boolean move(int fromRow, int fromCol, int toRow, int toCol, Square[][] board) {
-        return (Math.abs(fromRow - toRow) <= 1) && (Math.abs(fromCol - toCol) <= 1);
+        return ((Math.abs(fromRow - toRow) <= 1) && (Math.abs(fromCol - toCol) <= 1));
+    }
+
+    @Override
+    public boolean castle(int toRow, int toCol, Square[][] board) {
+        boolean flag = false;
+        if ((!canCastle) || (isBlack && toRow != 7) || (!isBlack && toRow != 0)); else if ((toCol == 2 && board[toRow][0].coin instanceof Rook) || (toCol == 6 && board[toRow][7].coin instanceof Rook)) {
+            Rook rook = (Rook) board[toRow][(toCol == 2) ? (0) : (7)].coin;
+            if ((rook.canCastle) && (rook.move(toRow, (toCol == 2) ? (0) : (7), toRow, 4, board))) {
+                flag = true;
+            }
+        }
+        return flag;
     }
 }
 
@@ -87,8 +114,11 @@ class Bishop extends Coin {
 
 class Rook extends Coin {
 
+    boolean canCastle;
+
     Rook(boolean color) {
         super(color);
+        canCastle = true;
     }
 
     @Override
@@ -114,7 +144,7 @@ class Knight extends Coin {
     }
 }
 
-class Pawn extends Coin {
+class Pawn extends Coin implements coinPromotion {
 
     Pawn(boolean color) {
         super(color);
@@ -132,12 +162,31 @@ class Pawn extends Coin {
         } else if (Math.abs(toCol - fromCol) == 1 && ((!isBlack && toRow - fromRow == 1) || (isBlack && fromRow - toRow == 1)) && board[toRow][toCol].coin != null) {
             flag = true;
         }
-        if (flag && (toRow == 7 || toRow == 0)) {
-            promote(toCol, toRow, board);
-        }
         return flag;
     }
 
-    void promote(int toCol, int toRow, Square[][] board) {
+    @Override
+    public boolean promote(int toRow, int toCol, Square[][] board) {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter the Coin for Promotion:");
+        char promoteCoin = (char) in.nextInt();
+        switch (promoteCoin) {
+            case 'Q':
+                board[toRow][toCol].coin = new Queen(isBlack);
+                break;
+            case 'R':
+                board[toRow][toCol].coin = new Rook(isBlack);
+                break;
+            case 'N':
+                board[toRow][toCol].coin = new Knight(isBlack);
+                break;
+            case 'B':
+                board[toRow][toCol].coin = new Bishop(isBlack);
+                break;
+            default:
+                System.out.println("Invalid Promotion...");
+                return false;
+        }
+        return true;
     }
 }
