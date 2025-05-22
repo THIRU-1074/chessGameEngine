@@ -1,6 +1,6 @@
 package chessGameEngine;
 
-import java.util.*;
+import java.util.*;           // JFrame, JPanel, JLabel, ImageIcon, etc.
 
 class Test {
 
@@ -48,15 +48,17 @@ class Test {
         if (b.move(fromRow, fromCol, toRow, toCol, true)) {
             System.out.println("Legal Move ...");
         }
-        display(b);
     }
 
     public static void main(String[] args) {
         Board b = new Board();
         Scanner in = new Scanner(System.in);
+        ChessBoardGUI gui = ChessBoardGUI.getInstance();
+        gui.displayBoard(b);
         while (!b.isMate) {
             String move = in.nextLine();
             moveParser(move, b);
+            gui.displayBoard(b);
             b.checkMate(b.isBlackTurn);
         }
         if (!b.check(b.isBlackTurn)) {

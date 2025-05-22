@@ -220,6 +220,25 @@ final class Board {
         return true;
     }
 
+    boolean enPassant(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
+        if (prevMoves.isEmpty() || !(board[fromRow][fromCol].coin instanceof Pawn)); else if ((board[fromRow][fromCol].coin.isBlack) ? (fromRow != 3 || toRow != 2) : (fromRow != 4 || toRow != 5)); else {
+            String prevMove = prevMoves.peek();
+            if ((!board[fromRow][fromCol].coin.isBlack) ? (prevMove.charAt(1) != '6' || prevMove.charAt(3) != '4') : (prevMove.charAt(1) != 1 || prevMove.charAt(3) != '3')) {
+                if (verbose) {
+                    System.out.println("Here 1");
+                }
+            } else if (!(board[fromRow][toCol].coin instanceof Pawn)); else if (prevMove.charAt(2) == prevMove.charAt(4) && (prevMove.charAt(2) == toCol + 48)) {
+                board[toRow][toCol].coin = board[fromRow][toCol].coin;
+                board[fromRow][toCol].coin = null;
+                return true;
+            }
+        }
+        if (verbose) {
+            System.out.println("Here 2");
+        }
+        return false;
+    }
+
     boolean move(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
         if (fromRow < 0 || fromRow > 7 || fromCol < 0 || fromCol > 7) {
             if (verbose) {
@@ -246,7 +265,7 @@ final class Board {
             return false;
         }
         if (!board[fromRow][fromCol].coin.move(fromRow, fromCol, toRow, toCol, board)) {
-            if (castle(fromRow, fromCol, toRow, toCol, verbose)); else {
+            if (castle(fromRow, fromCol, toRow, toCol, verbose)); else if (enPassant(fromRow, fromCol, toRow, toCol, verbose)); else {
                 if (verbose) {
                     System.out.println("The coin move is not feasible...");
                 }
