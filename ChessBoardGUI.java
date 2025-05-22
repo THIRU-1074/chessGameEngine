@@ -32,7 +32,7 @@ public class ChessBoardGUI extends JFrame {
         String[] pieces = {"wK", "wQ", "wR", "wB", "wN", "wP", "bK", "bQ", "bR", "bB", "bN", "bP"};
         for (String piece : pieces) {
             try {
-                ImageIcon icon = new ImageIcon(getClass().getResource("/chessGameEngine/chessPieces" + piece + ".png"));
+                ImageIcon icon = new ImageIcon(getClass().getResource("/chessGameEngine/chessPieces/" + piece + ".png"));
                 Image scaled = icon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
                 imageMap.put(piece, new ImageIcon(scaled));
             } catch (Exception e) {
