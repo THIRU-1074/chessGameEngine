@@ -1,6 +1,6 @@
 package chessGameEngine;
 
-import java.util.*;           // JFrame, JPanel, JLabel, ImageIcon, etc.
+import java.util.*;
 
 class Test {
 
@@ -51,17 +51,59 @@ class Test {
     }
 
     public static void main(String[] args) {
-        Board b = new Board();
+        Board b = Board.getInstance();
         Scanner in = new Scanner(System.in);
-        ChessBoardGUI gui = ChessBoardGUI.getInstance();
+        ChessBoardGUI gui = null;
+        boolean isControlMode = true;
+        while (isControlMode) {
+            System.out.println("Press One to Start the Game...!");
+            if (in.nextInt() == 1) {
+                gui = ChessBoardGUI.getInstance();
+                isControlMode = false;
+            }
+        }
+        if (gui == null) {
+            return;
+        }
         gui.displayBoard(b);
+        in.nextLine();
         while (!b.isMate) {
             String move = in.nextLine();
+            if (move.equals("ctrl")) {
+                isControlMode = true;
+            }
+            while (isControlMode) {
+                System.out.println("Enter :\n 'u' for Undo...\n 'rst' for Board reset...\n 'wpt' for white Points...\n 'bpt' for black Points...\n 'chk' to see if check...\n 'game' to enter the game mode...");
+                switch (in.nextLine()) {
+                    case "u" -> {
+                        b.undo();
+                        gui.displayBoard(b);
+                    }
+                    case "rst" -> {
+                        b.resetBoard();
+                        gui.displayBoard(b);
+                    }
+                    case "bpt" ->
+                        System.out.println("Black Point:" + b.blackPoints);
+                    case "wpt" ->
+                        System.out.println("White Points:" + b.whitePoints);
+                    case "chk" ->
+                        System.out.println((b.isCheck) ? ("Your on Check") : ("Safe no check"));
+                    case "game" -> {
+                        isControlMode = false;
+                        System.out.println("Entering back to game...!");
+                    }
+                    default ->
+                        System.out.println("Invalid ctrl cmd....!");
+                }
+            }
+            if (move.equals("ctrl")) {
+                continue;
+            }
             moveParser(move, b);
             gui.displayBoard(b);
-            b.checkMate(b.isBlackTurn);
         }
-        if (!b.check(b.isBlackTurn)) {
+        if (!b.isCheck) {
             System.out.println("Stale Mate (Draw)");
         } else if (b.isBlackTurn) {
             System.out.println("White won");

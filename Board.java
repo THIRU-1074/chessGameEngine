@@ -4,17 +4,26 @@ import java.util.*;
 
 final class Board {
 
-    Square[][] board;
+    static Board b;
     boolean isMate;
     boolean isCheck;
     int blackPoints, whitePoints;
     boolean isBlackTurn;
-    Stack<Coin> captured;
-    Stack<String> prevMoves;
-    int kingRowBlack, kingColBlack;
-    int kingRowWhite, kingColWhite;
+    Square[][] board;
+    private Stack<Coin> captured;
+    private Stack<String> prevMoves;
+    private int kingRowBlack, kingColBlack;
+    private int kingRowWhite, kingColWhite;
 
-    boolean check(boolean checkForBlack) {
+    String prevMove() {
+        if (prevMoves.isEmpty()) {
+            return "";
+        } else {
+            return prevMoves.peek();
+        }
+    }
+
+    private boolean check(boolean checkForBlack) {
         for (int r = 0; r < 8; ++r) {
             for (int c = 0; c < 8; ++c) {
                 if (board[r][c].coin == null) {
@@ -39,7 +48,7 @@ final class Board {
         return false;
     }
 
-    boolean anyLegalMoveForCoin(int row, int col) {
+    private boolean anyLegalMoveForCoin(int row, int col) {
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if (move(row, col, i, j, false)) {
@@ -52,7 +61,7 @@ final class Board {
         return false;
     }
 
-    boolean checkMate(boolean checkMateForBlack) {
+    private boolean checkMate(boolean checkMateForBlack) {
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if (board[i][j].coin == null
@@ -127,7 +136,7 @@ final class Board {
         }
     }
 
-    int pointOf(Coin captureCoin) {
+    private int pointOf(Coin captureCoin) {
         int point;
         if (captureCoin == null) {
             point = 0;
@@ -143,7 +152,7 @@ final class Board {
         return point;
     }
 
-    boolean castle(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
+    private boolean castle(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
         if (board[fromRow][fromCol].coin instanceof King && !isCheck) {
             King king = (King) board[fromRow][fromCol].coin;
             if (!king.castle(toRow, toCol, board)) {
@@ -208,7 +217,7 @@ final class Board {
         return false;
     }
 
-    boolean promote(int toRow, int toCol) {
+    private boolean promote(int toRow, int toCol) {
         if ((board[toRow][toCol].coin instanceof Pawn) && (toRow == '7' || toRow == '0')) {
             Pawn pawn = (Pawn) board[toRow][toCol].coin;
             if (!pawn.promote(toRow, toCol, board)) {
@@ -220,7 +229,7 @@ final class Board {
         return true;
     }
 
-    boolean enPassant(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
+    private boolean enPassant(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
         if (prevMoves.isEmpty() || !(board[fromRow][fromCol].coin instanceof Pawn)); else if ((board[fromRow][fromCol].coin.isBlack) ? (fromRow != 3 || toRow != 2) : (fromRow != 4 || toRow != 5)); else {
             String prevMove = prevMoves.peek();
             if ((!board[fromRow][fromCol].coin.isBlack) ? (prevMove.charAt(1) != '6' || prevMove.charAt(3) != '4') : (prevMove.charAt(1) != 1 || prevMove.charAt(3) != '3')) {
@@ -335,6 +344,9 @@ final class Board {
             return false;
         }
         isCheck = check(isBlackTurn);
+        if (verbose) {
+            isMate = checkMate(isBlackTurn);
+        }
         return true;
     }
 
@@ -383,7 +395,7 @@ final class Board {
         }
     }
 
-    Board() {
+    private Board() {
         board = new Square[8][8];
 
         boolean colorStart = false;
@@ -396,5 +408,12 @@ final class Board {
             colorStart = !colorStart;
         }
         resetBoard();
+    }
+
+    public static Board getInstance() {
+        if (b == null) {
+            b = new Board();
+        }
+        return b;
     }
 }

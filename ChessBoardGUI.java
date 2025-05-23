@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.HashMap;
 import javax.swing.*;
 
-public class ChessBoardGUI extends JFrame {
+class ChessBoardGUI extends JFrame {
 
     private static ChessBoardGUI instance;
     private final JPanel boardPanel;
@@ -48,8 +48,9 @@ public class ChessBoardGUI extends JFrame {
         turnLabel.setText(board.isBlackTurn ? "Black's Turn" : "White's Turn");
 
         int fromRow = -1, fromCol = -1, toRow = -1, toCol = -1;
-        if (!board.prevMoves.isEmpty()) {
-            String move = board.prevMoves.peek();
+        String move = board.prevMove();
+        if (move.length() != 0) {
+
             if (move.length() >= 5) {
                 fromRow = move.charAt(1) - '0';
                 fromCol = move.charAt(2) - '0';
