@@ -16,6 +16,7 @@
 2.UI plugin <br>
 -> Initally Stage to just Display the board,moves and Turn<br>
 ![GUI](Game_Visual_Stage2.png)
-3.Training the DL model to develop the Bot [Reinforcement Learning]
-
+3.Training the DL model to develop the Bot [Reinforcement Learning]<br>
+->Stockfish Engine is used for BestMoves ,the custom model would be implemented though the perfermance couldn't be as much still an exciting to try implement one.<br>
+->The custom model would follow the UCI guidelines for communication with GameEngine.
 4.Connect the UI and model for a complete Engine
