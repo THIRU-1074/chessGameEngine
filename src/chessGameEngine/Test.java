@@ -55,7 +55,7 @@ class Test {
         if (in.next().charAt(0) == 'b') {
             isBotActive = true;
             bot = StockfishEngine.getInstance();
-            boolean started = bot.startEngine("chessGameEngine/stockfish-windows-x86-64-avx2.exe");
+            boolean started = bot.startEngine("stockfish-windows-x86-64-avx2.exe");
             if (!started) {
                 System.out.println("Failed to start Stockfish");
                 return;
