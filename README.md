@@ -9,6 +9,17 @@
 
 > javac -d class src/chessGameEngine/\*.java <br>
 > java -cp class chessGameEngine.Test <br>
+
+->Or to just run the .jar file of the package[Recommended]<br>
+
+> java -jar ./class/chessGameEngine.jar<br>
+
+->To create a JAR file <br>
+
+> jar cvfm chessGameEngine.jar manifest.txt chessGameEngine<br>
+
+[The manifest.txt contains the class which contains main method]<br>
+
 > just Type **from** and **to** Positions<br> [ fromCol[a-h] fromRow[1-8] toCol[a-h] toRow[1-8] ]<br>
 
     (eg) e2e4,a7a6....
