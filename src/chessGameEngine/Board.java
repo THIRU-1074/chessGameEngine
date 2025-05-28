@@ -155,10 +155,9 @@ final class Board {
     }
 
     private boolean castle(int fromRow, int fromCol, int toRow, int toCol) {
-        if (board[fromRow][fromCol].coin instanceof King && !isCheck) {
+        if (board[fromRow][fromCol].coin instanceof King && !check(isBlackTurn)) {
             King king = (King) board[fromRow][fromCol].coin;
             if (!king.castle(toRow, toCol, board)) {
-                System.out.println("Castling not Feasible...");
                 return false;
             }
             Rook rook = (Rook) board[toRow][(toCol == 2) ? (0) : (7)].coin;
