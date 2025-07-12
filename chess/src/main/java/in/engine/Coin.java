@@ -182,7 +182,6 @@ class Pawn extends Coin implements coinPromotion {
                 board[toRow][toCol].coin = new Bishop(isBlack);
                 break;
             default:
-                System.out.println("Invalid Promotion...");
                 return false;
         }
         return true;

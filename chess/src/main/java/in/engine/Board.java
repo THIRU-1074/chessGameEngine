@@ -1,5 +1,6 @@
 package in.engine;
 
+import java.io.PrintStream;
 import java.util.*;
 
 final class Board {
@@ -16,6 +17,7 @@ final class Board {
     private int kingRowBlack, kingColBlack;
     private int kingRowWhite, kingColWhite;
     char flag;
+    PrintStream out;
     String prevMove() {
         if (prevMoves.isEmpty()) {
             return "";
@@ -35,12 +37,12 @@ final class Board {
                 }
                 if (board[r][c].coin.isBlack) {
                     if (board[r][c].coin.move(r, c, kingRowWhite, kingColWhite, board)) {
-                        //System.out.println(r + " " + c);
+                        //out.println(r + " " + c);
                         return true;
                     }
                 } else {
                     if (board[r][c].coin.move(r, c, kingRowBlack, kingColBlack, board)) {
-                        //System.out.println(r + "   " + c);
+                        //out.println(r + "   " + c);
                         return true;
                     }
                 }
@@ -53,7 +55,7 @@ final class Board {
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if (move(row, col, i, j, false)) {
-                    // System.out.println("From " + row + " " + col + " To " + i + " " + j);
+                    // out.println("From " + row + " " + col + " To " + i + " " + j);
                     undo();
                     return true;
                 }
@@ -240,32 +242,32 @@ final class Board {
     boolean move(int fromRow, int fromCol, int toRow, int toCol, boolean verbose) {
         if (fromRow < 0 || fromRow > 7 || fromCol < 0 || fromCol > 7) {
             if (verbose) {
-                System.out.println("Move out of Bound...");
+                out.println("Move out of Bound...");
             }
             return false;
         }
         if (toRow < 0 || toRow > 7 || toCol < 0 || toCol > 7) {
             if (verbose) {
-                System.out.println("Move out of Bound...");
+                out.println("Move out of Bound...");
             }
             return false;
         }
         if (board[fromRow][fromCol].coin == null) {
             if (verbose) {
-                System.out.println("No Coin is there...");
+                out.println("No Coin is there...");
             }
             return false;
         }
         if (board[fromRow][fromCol].coin.isBlack != isBlackTurn) {
             if (verbose) {
-                System.out.println("Its not your Turn...");
+                out.println("Its not your Turn...");
             }
             return false;
         }
         if (!board[fromRow][fromCol].coin.move(fromRow, fromCol, toRow, toCol, board)) {
             if (castle(fromRow, fromCol, toRow, toCol)); else if (enPassant(fromRow, fromCol, toRow, toCol)); else {
                 if (verbose) {
-                    System.out.println("The coin move is not feasible...");
+                    out.println("The coin move is not feasible...");
                 }
                 return false;
             }
@@ -273,7 +275,7 @@ final class Board {
         if (board[toRow][toCol].coin != null) {
             if (board[toRow][toCol].coin.isBlack == board[fromRow][fromCol].coin.isBlack) {
                 if (verbose) {
-                    System.out.println("Don't Capture your army.....");
+                    out.println("Don't Capture your army.....");
                 }
                 return false;
             }
@@ -326,7 +328,7 @@ final class Board {
         if (flag) {
             undo();
             if (verbose) {
-                System.out.println("There is Check on move...");
+                out.println("There is Check on move...");
             }
             return false;
         }
@@ -409,9 +411,10 @@ final class Board {
         resetBoard();
     }
 
-    public static Board getInstance() {
+    public static Board getInstance(PrintStream outStream) {
         if (b == null) {
             b = new Board();
+            b.out=outStream;
         }
         return b;
     }
